@@ -193,7 +193,7 @@
             <div class="face face-front"></div><div class="face face-back"></div><div class="face face-left"></div><div class="face face-right"></div><div class="face face-top"></div><div class="face face-bottom"></div>
         </div>
         <div class="card-final" id="result-card">
-            <div style="background:#000; height:100%; width:100%; border-radius:14px; overflow:hidden;">
+    	    <div id="card-inner" style="height:100%; width:100%; border-radius:14px; overflow:hidden;">
                 <div class="img-wrapper"><img class="card-img" id="result-img" src=""></div>
                 <div style="height:25%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
                     <div id="result-rarity" style="font-size:0.7rem; font-weight:bold; letter-spacing: 2px;"></div>
@@ -288,12 +288,15 @@
     };
 
     let currentCategory = "全部";
-    let energy = parseInt(localStorage.getItem('energy')) || 10;
-    let lastTime = parseInt(localStorage.getItem('lastTime')) || Date.now();
-    const MAX_ENERGY = 10;
-    const REFILL_SECONDS = 60;
-    const STORAGE_KEY = 'blindbox_inventory_v2';
-    let inventory = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    // 修正後: 檢查是否為 null，若是 null 才給 10，0 則保持為 0
+   let storedEnergy = localStorage.getItem('energy');
+   let energy = (storedEnergy === null) ? 10 : parseInt(storedEnergy);
+
+   let lastTime = parseInt(localStorage.getItem('lastTime')) || Date.now();
+   const MAX_ENERGY = 10;
+   const REFILL_SECONDS = 60;
+   const STORAGE_KEY = 'blindbox_inventory_v2';
+   let inventory = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
     // 1. 初始化分類按鈕
     function initCategoryBar() {
@@ -385,34 +388,59 @@
     }
     setInterval(updateEnergySystem, 1000);
 
-    function startGacha(sName) {
-        if (energy < 1) return;
-        energy--; updateEnergySystem();
-        const stage = document.getElementById('gacha-stage');
-        const box = document.getElementById('target-box');
-        const resCard = document.getElementById('result-card');
-        document.getElementById('result-img').src = "";
-        document.querySelectorAll('.face').forEach(f => f.style.backgroundImage = `url('${DATA[sName].cover}')`);
-        stage.style.display = 'flex'; box.style.display = 'block'; box.classList.add('box-animate'); box.classList.remove('box-burst'); resCard.style.display = 'none';
-        setTimeout(() => {
-            const s = DATA[sName];
-            const isSecret = (Math.random() * 100) < s.secretProb;
-            const pool = s.items.filter(i => i.type === (isSecret ? "secret" : "common"));
-            const result = pool[Math.floor(Math.random() * pool.length)];
-            const invKey = `${sName}_${result.name}`;
-            inventory[invKey] = (inventory[invKey] || 0) + 1;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
-            box.classList.remove('box-animate'); box.classList.add('box-burst');
-            setTimeout(() => {
-                box.style.display = 'none'; resCard.style.display = 'flex'; resCard.className = `card-final show ${result.type}`;
-                document.getElementById('result-img').src = result.img;
-                document.getElementById('result-rarity').innerText = result.type.toUpperCase();
-                document.getElementById('result-rarity').style.color = result.type === 'secret' ? '#ff00c8' : '#555';
-                document.getElementById('result-name').innerText = result.name;
-                document.getElementById('action-area').style.display = 'block';
-            }, 500);
-        }, 1800);
-    }
+	function startGacha(sName) {
+		if (energy < 1) return;
+		energy--; 
+		updateEnergySystem();
+		const stage = document.getElementById('gacha-stage');
+		const box = document.getElementById('target-box');
+		const resCard = document.getElementById('result-card');
+		const resImg = document.getElementById('result-img'); // 宣告變數優化效能
+
+		resImg.src = ""; // 清空舊圖
+		document.querySelectorAll('.face').forEach(f => f.style.backgroundImage = `url('${DATA[sName].cover}')`);
+		stage.style.display = 'flex'; 
+		box.style.display = 'block'; 
+		box.classList.add('box-animate'); 
+		box.classList.remove('box-burst'); 
+		resCard.style.display = 'none';
+		document.getElementById('action-area').style.display = 'none'; // 隱藏按鈕直到開獎
+
+		setTimeout(() => {
+			const s = DATA[sName];
+			const isSecret = (Math.random() * 100) < s.secretProb;
+			const pool = s.items.filter(i => i.type === (isSecret ? "secret" : "common"));
+			const result = pool[Math.floor(Math.random() * pool.length)];
+			
+			const invKey = `${sName}_${result.name}`;
+			inventory[invKey] = (inventory[invKey] || 0) + 1;
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
+			
+			box.classList.remove('box-animate'); 
+			box.classList.add('box-burst');
+
+			setTimeout(() => {
+				box.style.display = 'none'; 
+				resCard.style.display = 'flex'; 
+				resCard.className = `card-final show ${result.type}`;
+				
+				// --- 修改處：根據稀有度調整內層背景 ---
+				const inner = document.getElementById('card-inner');
+				if (result.type === 'secret') {
+					inner.style.background = 'transparent'; // 隱藏款：內層透明，才看得到外層流光
+				} else {
+					inner.style.background = '#000'; // 一般款：維持黑底
+				}
+				
+				document.getElementById('result-img').src = result.img;
+				
+				document.getElementById('result-rarity').innerText = result.type.toUpperCase();
+				document.getElementById('result-rarity').style.color = result.type === 'secret' ? '#ff00c8' : '#555';
+				document.getElementById('result-name').innerText = result.name;
+				document.getElementById('action-area').style.display = 'block';
+			}, 500);
+		}, 1800);
+	}
 
     function closeStage() { document.getElementById('gacha-stage').style.display = 'none'; }
     function switchTab(tab) {
