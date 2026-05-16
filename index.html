@@ -500,7 +500,7 @@
         "吉伊卡哇-便當系列": {
             category: "吉伊卡哇",
             cover: "https://i.meee.com.tw/ehh9g7s.jpg",
-            secretProb: 10,
+            secretProb: 0,
             items: [
                 { name: "吉伊飯團", type: "common", img: "https://i.meee.com.tw/vIMb7jd.jpg" },
                 { name: "小八香腸", type: "common", img: "https://i.meee.com.tw/4QeArI5.jpg" },
@@ -510,7 +510,41 @@
                 { name: "海獺炸牡蠣", type: "common", img: "https://i.meee.com.tw/dNoAjgP.jpg" },
                 { name: "獅薩玉子燒", type: "common", img: "https://i.meee.com.tw/HG3CqTP.jpg" }
             ]
+        },
+		
+		"吉伊卡哇-台灣夜市": {
+            category: "吉伊卡哇",
+            cover: "https://i.meee.com.tw/tCRyCqf.jpg",
+            secretProb: 0,
+            items: [
+                { name: "吉伊滷肉飯", type: "common", img: "https://i.meee.com.tw/U577Cn6.jpg" },
+                { name: "小八地瓜球", type: "common", img: "https://i.meee.com.tw/ewzpsHm.jpg" },
+                { name: "烏薩奇珍珠奶茶", type: "common", img: "https://i.meee.com.tw/ytznvBs.jpg" },
+                { name: "小桃芋圓豆花", type: "common", img: "https://i.meee.com.tw/xN5pmdN.jpg" },
+				{ name: "獅薩鹽酥大雞塊", type: "common", img: "https://i.meee.com.tw/FxFVo4x.jpg" },
+                { name: "栗子饅頭蚵仔麵線", type: "common", img: "https://i.meee.com.tw/cUOWi2C.jpg" },
+                { name: "海獺雪花冰", type: "common", img: "https://i.meee.com.tw/XLnbi05.jpg" },
+				{ name: "古本屋刈包", type: "common", img: "https://i.meee.com.tw/5AxFzON.jpg" }
+            ]
         }
+		
+		
+		/*
+		"": {
+            category: "",
+            cover: "",
+            secretProb: 10,
+            items: [
+                { name: "吉伊飯團", type: "common", img: "" },
+                { name: "小八香腸", type: "common", img: "" },
+                { name: "烏薩奇天婦羅", type: "common", img: "" },
+                { name: "小桃花椰菜", type: "common", img: "" },
+                { name: "栗子饅頭蘆筍", type: "common", img: "" },
+                { name: "海獺炸牡蠣", type: "common", img: "" },
+                { name: "獅薩玉子燒", type: "common", img: "" }
+            ]
+        }
+		*/
 		
     };
 
@@ -658,8 +692,14 @@
 
             if (!hasAnyOwned) return false;
 
-            const filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
-            return filteredItems.length > 0;
+			// 如果搜尋關鍵字包含在系列名稱內，整個系列直接判定符合
+			if (sName.toLowerCase().includes(searchTerm)) {
+				return true;
+			}
+
+			// 否則，才去檢查系列內有沒有任何卡片符合搜尋名稱
+			const filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
+			return filteredItems.length > 0;
         });
 
         // 圖鑑部分使用固定的設定或者也可以和商店分頁相同，此處改為同步動態一頁系列數量
@@ -672,7 +712,11 @@
 
         // 3. 渲染當前頁面的圖鑑系列
         pageSeriesKeys.forEach(sName => {
-            const filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
+            //如果不是因為系列名稱匹配成功，才對卡片名稱做單獨過濾
+			let filteredItems = DATA[sName].items;
+			if (!sName.toLowerCase().includes(searchTerm)) {
+				filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
+			}
             
             let html = `<h2 style="color: var(--text-main); margin-top:50px; border-left:4px solid var(--series-title-border); padding-left:15px; font-size:1.2rem;">${sName}</h2><div class="gallery-grid">`;
             filteredItems.forEach(item => {
@@ -692,7 +736,7 @@
         });
 
         if (validSeriesKeys.length === 0) {
-            list.innerHTML = `<div class="empty-notice">你的圖鑑空空如也，快去商店抽取第一張盲盒來解鎖吧！✨</div>`;
+            list.innerHTML = `<div class="empty-notice">你的圖鑑空空如也，快去商店抽取第一張盲盒來解鎖吧！</div>`;
         }
 
         // 5. 渲染圖鑑分頁鈕
