@@ -270,21 +270,33 @@
         [data-theme="unicorn"] .buy-btn:disabled { color: #a1a1a6; }
 
         /* 3D 舞台區域 */
-        #gacha-stage { 
+		#gacha-stage { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--gacha-bg); z-index: 2000; perspective: 1200px; 
             flex-direction: column; justify-content: center; align-items: center; gap: 40px; 
             transition: background 0.3s;
         }
         .result-container { position: relative; width: 300px; height: 450px; display: flex; justify-content: center; align-items: center; }
-        .box-3d { width: 160px; height: 220px; position: relative; transform-style: preserve-3d; transform: rotateY(-20deg) rotateX(10deg); }
-        .face { position: absolute; background-size: cover; background-position: center; border: 1px solid var(--face-border); backface-visibility: hidden; border-radius: 8px; }
-        .face-front { width: 160px; height: 220px; transform: translateZ(30px); }
-        .face-back { width: 160px; height: 220px; transform: rotateY(180deg) translateZ(30px); filter: var(--face-brightness-back); }
-        .face-right { width: 60px; height: 220px; transform: rotateY(90deg) translateZ(130px); filter: var(--face-brightness-side); }
-        .face-left { width: 60px; height: 220px; transform: rotateY(-90deg) translateZ(30px); filter: var(--face-brightness-side); }
-        .face-top { width: 160px; height: 60px; transform: rotateX(90deg) translateZ(30px); filter: var(--face-brightness-top); }
-        .face-bottom { width: 160px; height: 60px; transform: rotateX(-90deg) translateZ(190px); filter: var(--face-brightness-bottom); }
+        
+        .box-3d { width: 160px; height: 220px; position: relative; transform-style: preserve-3d; transform: rotateY(20deg) rotateX(10deg); }
+        
+        .face { 
+			position: absolute; 
+			background-size: cover; 
+			background-position: center; 
+			border: 1px solid var(--face-border); 
+			backface-visibility: hidden; 
+			border-radius: 8px; 
+			box-sizing: border-box; 
+			background-repeat: no-repeat;
+		}
+        
+        .face-front  { width: 160px; height: 220px; transform: translateZ(30px); filter: brightness(1); }
+		.face-back   { width: 160px; height: 220px; transform: rotateY(180deg) translateZ(30px); filter: brightness(0.65); }
+		.face-right  { width: 60px; height: 220px; transform: rotateY(90deg) translateZ(130px); filter: brightness(0.65); }
+		.face-left   { width: 60px; height: 220px; transform: rotateY(-90deg) translateZ(30px); filter: brightness(0.65); }
+		.face-top    { width: 160px; height: 60px; transform: rotateX(90deg) translateZ(30px); filter: brightness(0.65); }
+		.face-bottom { width: 160px; height: 60px; transform: rotateX(-90deg) translateZ(190px); filter: brightness(0.65); }
         
         .box-animate { animation: boxSpin 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
         @keyframes boxSpin { 0% { transform: rotateY(-20deg) rotateX(10deg); } 50% { transform: rotateY(180deg) rotateX(-5deg) translateY(-15px); } 100% { transform: rotateY(340deg) rotateX(10deg); } }
@@ -488,7 +500,7 @@
                 { name: "老闆請你呷大餐", type: "common", img: "https://lh3.googleusercontent.com/d/1qQbEonepa56hxGot3-xfwA9sLr1tVm2S" },
                 { name: "西知識甲", type: "common", img: "https://lh3.googleusercontent.com/d/1Hbs_pSsDLvJzhtd6WW0_M1SRw2An9kgh" },
                 { name: "呷梨", type: "common", img: "https://lh3.googleusercontent.com/d/1J-hY-23GSk6qEWMR0cL15twZ8aMVVwCf" },
-                { name: "夜海鳴甲", type: "common", img: "https://k9cotn_B8S3pWiAQLG-Wq8HXzBnSW02c" },
+                { name: "夜海鳴甲", type: "common", img: "https://lh3.googleusercontent.com/d/1k9cotn_B8S3pWiAQLG-Wq8HXzBnSW02c" },
                 { name: "念甲甲", type: "common", img: "https://lh3.googleusercontent.com/d/1t-FPhQpZ6bbJBUHJbsnHNxh99ru8pU0b" },
                 { name: "梅甲瓜報社", type: "common", img: "https://lh3.googleusercontent.com/d/1Re1Abq52KL0TW8Ime39I0t8Ym_-hOse2" },
                 { name: "歐呷.png", type: "common", img: "https://lh3.googleusercontent.com/d/11DamJueecUum9bYX8HFBL0TxCwGHxz1c" },
@@ -511,8 +523,8 @@
                 { name: "獅薩玉子燒", type: "common", img: "https://i.meee.com.tw/HG3CqTP.jpg" }
             ]
         },
-		
-		"吉伊卡哇-台灣夜市": {
+        
+        "吉伊卡哇-台灣夜市": {
             category: "吉伊卡哇",
             cover: "https://i.meee.com.tw/tCRyCqf.jpg",
             secretProb: 0,
@@ -521,31 +533,12 @@
                 { name: "小八地瓜球", type: "common", img: "https://i.meee.com.tw/ewzpsHm.jpg" },
                 { name: "烏薩奇珍珠奶茶", type: "common", img: "https://i.meee.com.tw/ytznvBs.jpg" },
                 { name: "小桃芋圓豆花", type: "common", img: "https://i.meee.com.tw/xN5pmdN.jpg" },
-				{ name: "獅薩鹽酥大雞塊", type: "common", img: "https://i.meee.com.tw/FxFVo4x.jpg" },
+                { name: "獅薩鹽酥大雞塊", type: "common", img: "https://i.meee.com.tw/FxFVo4x.jpg" },
                 { name: "栗子饅頭蚵仔麵線", type: "common", img: "https://i.meee.com.tw/cUOWi2C.jpg" },
                 { name: "海獺雪花冰", type: "common", img: "https://i.meee.com.tw/XLnbi05.jpg" },
-				{ name: "古本屋刈包", type: "common", img: "https://i.meee.com.tw/5AxFzON.jpg" }
+                { name: "古本屋刈包", type: "common", img: "https://i.meee.com.tw/5AxFzON.jpg" }
             ]
         }
-		
-		
-		/*
-		"": {
-            category: "",
-            cover: "",
-            secretProb: 10,
-            items: [
-                { name: "吉伊飯團", type: "common", img: "" },
-                { name: "小八香腸", type: "common", img: "" },
-                { name: "烏薩奇天婦羅", type: "common", img: "" },
-                { name: "小桃花椰菜", type: "common", img: "" },
-                { name: "栗子饅頭蘆筍", type: "common", img: "" },
-                { name: "海獺炸牡蠣", type: "common", img: "" },
-                { name: "獅薩玉子燒", type: "common", img: "" }
-            ]
-        }
-		*/
-		
     };
 
     // ================= 動態計算每頁顯示數量 =================
@@ -565,6 +558,7 @@
         const minCardWidth = 280;
         const gap = 30;
         
+        // 一行可容納欄數
         let cols = Math.floor((containerWidth + gap) / (minCardWidth + gap));
         cols = Math.max(1, cols); // 至少 1 行
 
@@ -692,14 +686,14 @@
 
             if (!hasAnyOwned) return false;
 
-			// 如果搜尋關鍵字包含在系列名稱內，整個系列直接判定符合
-			if (sName.toLowerCase().includes(searchTerm)) {
-				return true;
-			}
+            // 如果搜尋關鍵字包含在系列名稱內，整個系列直接判定符合
+            if (sName.toLowerCase().includes(searchTerm)) {
+                return true;
+            }
 
-			// 否則，才去檢查系列內有沒有任何卡片符合搜尋名稱
-			const filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
-			return filteredItems.length > 0;
+            // 否則，才去檢查系列內有沒有任何卡片符合搜尋名稱
+            const filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
+            return filteredItems.length > 0;
         });
 
         // 圖鑑部分使用固定的設定或者也可以和商店分頁相同，此處改為同步動態一頁系列數量
@@ -713,10 +707,10 @@
         // 3. 渲染當前頁面的圖鑑系列
         pageSeriesKeys.forEach(sName => {
             //如果不是因為系列名稱匹配成功，才對卡片名稱做單獨過濾
-			let filteredItems = DATA[sName].items;
-			if (!sName.toLowerCase().includes(searchTerm)) {
-				filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
-			}
+            let filteredItems = DATA[sName].items;
+            if (!sName.toLowerCase().includes(searchTerm)) {
+                filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
+            }
             
             let html = `<h2 style="color: var(--text-main); margin-top:50px; border-left:4px solid var(--series-title-border); padding-left:15px; font-size:1.2rem;">${sName}</h2><div class="gallery-grid">`;
             filteredItems.forEach(item => {
@@ -736,7 +730,7 @@
         });
 
         if (validSeriesKeys.length === 0) {
-            list.innerHTML = `<div class="empty-notice">你的圖鑑空空如也，快去商店抽取第一張盲盒來解鎖吧！</div>`;
+            list.innerHTML = `<div class="empty-notice">你的圖鑑空空如也，快去商店抽取第一個盲盒來解鎖吧！</div>`;
         }
 
         // 5. 渲染圖鑑分頁鈕
@@ -798,27 +792,36 @@
         inventory[invKey] = (inventory[invKey] || 0) + 1;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
 
-        showGachaAnimation(reward);
+		// 同時將中獎卡片資訊與該盲盒的封面圖 (series.cover) 傳過去
+        showGachaAnimation(reward, series.cover);
     }
 
-    function showGachaAnimation(reward) {
+    
+    function showGachaAnimation(reward, seriesCover) {
         const stage = document.getElementById('gacha-stage');
         const box = document.getElementById('target-box');
         const card = document.getElementById('result-card');
         const action = document.getElementById('action-area');
+		
+        // 動態將系列的封面圖網址，同步填入到 3D 盒子的每一個面
+		const allFaces = box.querySelectorAll('.face');
+		allFaces.forEach(face => {
+			face.style.backgroundImage = `url('${seriesCover}')`;
+		});
         
         card.className = "card-final" + (reward.type === 'secret' ? ' secret' : '');
         document.getElementById('result-img').src = reward.img;
-        document.getElementById('result-rarity').innerText = reward.type === 'secret' ? 'SECRET 隱藏款' : 'COMMON 常規款';
+        document.getElementById('result-rarity').innerText = reward.type === 'secret' ? 'SECRET' : 'COMMON';
         document.getElementById('result-rarity').style.color = reward.type === 'secret' ? '#f472b6' : '#9333ea';
         document.getElementById('result-name').innerText = reward.name;
 
         stage.style.display = 'flex';
         box.style.display = 'block';
-        box.className = "box-3d box-animate";
+        box.className = "box-3d box-animate"; // 重置並啟動精準轉一圈動畫
         card.style.display = 'none';
         action.style.display = 'none';
 
+        // 1200ms 正好配合轉完一圈的時間點觸發爆開效果
         setTimeout(() => {
             box.className = "box-3d box-burst";
             setTimeout(() => {
@@ -827,7 +830,7 @@
                 card.classList.add('show');
                 action.style.display = 'block';
             }, 400);
-        }, 1800);
+        }, 600);
     }
 
     function closeStage() {
