@@ -270,7 +270,7 @@
         [data-theme="unicorn"] .buy-btn:disabled { color: #a1a1a6; }
 
         /* 3D 舞台區域 */
-		#gacha-stage { 
+        #gacha-stage { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--gacha-bg); z-index: 2000; perspective: 1200px; 
             flex-direction: column; justify-content: center; align-items: center; gap: 40px; 
@@ -281,22 +281,22 @@
         .box-3d { width: 160px; height: 220px; position: relative; transform-style: preserve-3d; transform: rotateY(20deg) rotateX(10deg); }
         
         .face { 
-			position: absolute; 
-			background-size: cover; 
-			background-position: center; 
-			border: 1px solid var(--face-border); 
-			backface-visibility: hidden; 
-			border-radius: 8px; 
-			box-sizing: border-box; 
-			background-repeat: no-repeat;
-		}
+            position: absolute; 
+            background-size: cover; 
+            background-position: center; 
+            border: 1px solid var(--face-border); 
+            backface-visibility: hidden; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            background-repeat: no-repeat;
+        }
         
         .face-front  { width: 160px; height: 220px; transform: translateZ(30px); filter: brightness(1); }
-		.face-back   { width: 160px; height: 220px; transform: rotateY(180deg) translateZ(30px); filter: brightness(0.65); }
-		.face-right  { width: 60px; height: 220px; transform: rotateY(90deg) translateZ(130px); filter: brightness(0.65); }
-		.face-left   { width: 60px; height: 220px; transform: rotateY(-90deg) translateZ(30px); filter: brightness(0.65); }
-		.face-top    { width: 160px; height: 60px; transform: rotateX(90deg) translateZ(30px); filter: brightness(0.65); }
-		.face-bottom { width: 160px; height: 60px; transform: rotateX(-90deg) translateZ(190px); filter: brightness(0.65); }
+        .face-back   { width: 160px; height: 220px; transform: rotateY(180deg) translateZ(30px); filter: brightness(0.65); }
+        .face-right  { width: 60px; height: 220px; transform: rotateY(90deg) translateZ(130px); filter: brightness(0.65); }
+        .face-left   { width: 60px; height: 220px; transform: rotateY(-90deg) translateZ(30px); filter: brightness(0.65); }
+        .face-top    { width: 160px; height: 60px; transform: rotateX(90deg) translateZ(30px); filter: brightness(0.65); }
+        .face-bottom { width: 160px; height: 60px; transform: rotateX(-90deg) translateZ(190px); filter: brightness(0.65); }
         
         .box-animate { animation: boxSpin 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
         @keyframes boxSpin { 0% { transform: rotateY(-20deg) rotateX(10deg); } 50% { transform: rotateY(180deg) rotateX(-5deg) translateY(-15px); } 100% { transform: rotateY(340deg) rotateX(10deg); } }
@@ -347,12 +347,12 @@
         }
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; margin-bottom: 40px;}
         
-        .mini-card { background: var(--mini-card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--mini-card-border); text-align: center; transition: 0.3s; }
-        .mini-card .img-container { width: 100%; height: 160px; background: var(--img-wrapper-bg); overflow: hidden; }
+        .mini-card { background: var(--mini-card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--mini-card-border); text-align: center; transition: 0.3s; transform-style: preserve-3d; }
+        .mini-card .img-container { width: 100%; height: 160px; background: var(--img-wrapper-bg); overflow: hidden; position: relative; }
         .mini-card img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .mini-card.owned img { display: block; }
         .mini-card.owned .placeholder { display: none; }
-        .placeholder { height: 100%; width: 100%; background: var(--img-wrapper-bg); display: flex; align-items: center; justify-content: center; color: var(--placeholder-color); font-size: 2.5rem; font-weight: bold; }
+        .placeholder { height: 100%; width: 100%; background: var(--img-wrapper-bg); display: flex; align-items: center; justify-content: center; color: var(--placeholder-color); font-size: 2.5rem; font-weight: bold; transition: opacity 0.5s ease; }
         
         /* 查無圖鑑時的提示樣式 */
         .empty-notice { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 1.1rem; font-weight: 500; }
@@ -393,6 +393,28 @@
         }
         [data-theme="dark"] .page-btn:disabled {
             color: #444;
+        }
+
+        /* ================= 動態解鎖翻牌與噴射彩帶效果樣式 ================= */
+        .mini-card.just-unlocked {
+            animation: cardRevealFlip 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes cardRevealFlip {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08) rotateY(90deg); }
+            100% { transform: scale(1) rotateY(0deg); }
+        }
+
+        /* 噴射彩帶畫布容器 */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
         }
     </style>
 </head>
@@ -446,6 +468,9 @@
     </div>
     <div id="action-area"><button class="collect-btn-styled" onclick="closeStage()">收入圖鑑</button></div>
 </div>
+
+<!-- 全系列集齊時使用的彩帶噴射 Canvas -->
+<canvas id="confetti-canvas"></canvas>
 
 <script>
     // DATA
@@ -541,33 +566,13 @@
         }
     };
 
-    // ================= 動態計算每頁顯示數量 =================
-    let currentTab = 'shop'; // 追蹤當前分頁
+    // ================= 全局狀態與變數 =================
+    let currentTab = 'shop'; 
     let shopCurrentPage = 1;
     let colCurrentPage = 1;
-
-    // 計算當前版面適合放置多少項目的函式
-    function calculateItemsPerPage(gridId) {
-        const grid = document.getElementById(gridId);
-        if (!grid) return 6; // 預設安全值
-
-        // 取得格線容器的當前實際寬度
-        const containerWidth = grid.clientWidth; 
-        
-        // 根據 CSS: minmax(280px, 1fr) 與 gap: 30px 計算一列可容納幾個
-        const minCardWidth = 280;
-        const gap = 30;
-        
-        // 一行可容納欄數
-        let cols = Math.floor((containerWidth + gap) / (minCardWidth + gap));
-        cols = Math.max(1, cols); // 至少 1 行
-
-        // 設定補滿版面的行數 (例如：自動排滿 2 行作為一頁)
-        const targetRows = 2; 
-        return cols * targetRows;
-    }
-
+    let gachaRewardInfo = null; // 紀錄當次抽盲盒的資訊
     let currentCategory = "全部";
+
     let storedEnergy = localStorage.getItem('energy');
     let energy = (storedEnergy === null) ? 10 : parseInt(storedEnergy);
     let lastTime = parseInt(localStorage.getItem('lastTime')) || Date.now();
@@ -590,7 +595,19 @@
     function resetShopPage() { shopCurrentPage = 1; }
     function resetColPage() { colCurrentPage = 1; }
 
-    // ================= 核心渲染與抽獎系統 =================
+    // ================= 動態版面計算 =================
+    function calculateItemsPerPage() {
+        const grid = document.getElementById('shelf');
+        if (!grid) return 6;
+        const containerWidth = grid.clientWidth || window.innerWidth * 0.9; 
+        const minCardWidth = 280;
+        const gap = 30;
+        let cols = Math.floor((containerWidth + gap) / (minCardWidth + gap));
+        cols = Math.max(1, cols);
+        return cols * 2; // 排滿 2 行為一頁
+    }
+
+    // ================= 核心渲染系統 =================
     function initCategoryBar() {
         const bar = document.getElementById('category-bar');
         const categories = ["全部", ...new Set(Object.values(DATA).map(item => item.category))];
@@ -604,23 +621,16 @@
         renderShop();
     }
 
-    // 渲染通用分頁控制列
     function renderPaginationUI(elementId, totalItems, currentPage, itemsPerPage, onPageChange) {
         const container = document.getElementById(elementId);
         container.innerHTML = "";
         const totalPages = Math.ceil(totalItems / itemsPerPage);
-        
-        if (totalPages <= 1) return; // 只有一頁時不顯示分頁鈕
+        if (totalPages <= 1) return;
 
-        // 上一頁
         container.innerHTML += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="${onPageChange}(${currentPage - 1})">«</button>`;
-        
-        // 頁碼
         for (let i = 1; i <= totalPages; i++) {
             container.innerHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="${onPageChange}(${i})">${i}</button>`;
         }
-
-        // 下一頁
         container.innerHTML += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${currentPage + 1})">»</button>`;
     }
 
@@ -635,21 +645,16 @@
         const searchTerm = document.getElementById('shop-search').value.toLowerCase();
         shelf.innerHTML = "";
 
-        // 1. 先過濾出符合條件的系列清單
         const filteredSeriesKeys = Object.keys(DATA).filter(sName => {
             const series = DATA[sName];
             return (currentCategory === "全部" || series.category === currentCategory) && sName.toLowerCase().includes(searchTerm);
         });
 
-        // 動態計算目前滿版所需要的每頁數量
-        const itemsPerPage = calculateItemsPerPage('shelf');
-
-        // 2. 計算分頁範圍
+        const itemsPerPage = calculateItemsPerPage();
         const startIndex = (shopCurrentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const pageSeriesKeys = filteredSeriesKeys.slice(startIndex, endIndex);
 
-        // 3. 渲染當前頁面的項目
         pageSeriesKeys.forEach(sName => {
             const series = DATA[sName];
             shelf.innerHTML += `
@@ -662,7 +667,6 @@
                 </div>`;
         });
 
-        // 4. 渲染商店分頁鈕
         renderPaginationUI('shop-pagination', filteredSeriesKeys.length, shopCurrentPage, itemsPerPage, 'changeShopPage');
     }
 
@@ -672,41 +676,29 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // 獲取目前「應該在圖鑑中被列出」的系列清單（即至少擁有一張卡片，且符合搜尋字詞）
+    function getValidCollectionSeries() {
+        const searchTerm = document.getElementById('col-search').value.toLowerCase();
+        return Object.keys(DATA).filter(sName => {
+            const hasAnyOwned = DATA[sName].items.some(item => (inventory[`${sName}_${item.name}`] || 0) > 0);
+            if (!hasAnyOwned) return false;
+            if (sName.toLowerCase().includes(searchTerm)) return true;
+            return DATA[sName].items.some(item => item.name.toLowerCase().includes(searchTerm));
+        });
+    }
+
     function renderCollection() {
         const list = document.getElementById('col-list');
         const searchTerm = document.getElementById('col-search').value.toLowerCase();
         list.innerHTML = "";
 
-        // 1. 先篩選出符合條件（且使用者「已至少擁有一張」）的系列
-        const validSeriesKeys = Object.keys(DATA).filter(sName => {
-            const hasAnyOwned = DATA[sName].items.some(item => {
-                const invKey = `${sName}_${item.name}`;
-                return (inventory[invKey] || 0) > 0;
-            });
-
-            if (!hasAnyOwned) return false;
-
-            // 如果搜尋關鍵字包含在系列名稱內，整個系列直接判定符合
-            if (sName.toLowerCase().includes(searchTerm)) {
-                return true;
-            }
-
-            // 否則，才去檢查系列內有沒有任何卡片符合搜尋名稱
-            const filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
-            return filteredItems.length > 0;
-        });
-
-        // 圖鑑部分使用固定的設定或者也可以和商店分頁相同，此處改為同步動態一頁系列數量
-        const itemsPerPage = calculateItemsPerPage('shelf'); 
-
-        // 2. 計算圖鑑分頁範圍
+        const validSeriesKeys = getValidCollectionSeries();
+        const itemsPerPage = calculateItemsPerPage(); 
         const startIndex = (colCurrentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const pageSeriesKeys = validSeriesKeys.slice(startIndex, endIndex);
 
-        // 3. 渲染當前頁面的圖鑑系列
         pageSeriesKeys.forEach(sName => {
-            //如果不是因為系列名稱匹配成功，才對卡片名稱做單獨過濾
             let filteredItems = DATA[sName].items;
             if (!sName.toLowerCase().includes(searchTerm)) {
                 filteredItems = DATA[sName].items.filter(item => item.name.toLowerCase().includes(searchTerm));
@@ -716,10 +708,21 @@
             filteredItems.forEach(item => {
                 const invKey = `${sName}_${item.name}`;
                 const count = inventory[invKey] || 0;
-                const isOwned = count > 0;
+                
+                // 檢查這張卡是不是剛剛新抽到、正準備播動畫的卡
+                const isCurrentGachaNewCard = gachaRewardInfo && gachaRewardInfo.isNewCard && gachaRewardInfo.invKey === invKey;
+                
+                // 如果是當前新卡，渲染時先當作「未擁有」(不加 owned)，等一下由 closeStage 負責翻開它
+                const isOwned = count > 0 && !isCurrentGachaNewCard;
+                
+                const safeCardId = `card-${btoa(encodeURIComponent(invKey)).replace(/=/g, '')}`;
+                
                 html += `
-                    <div class="mini-card ${isOwned ? 'owned' : ''}">
-                        <div class="img-container"><div class="placeholder">?</div><img src="${item.img}"></div>
+                    <div class="mini-card ${isOwned ? 'owned' : ''}" id="${safeCardId}">
+                        <div class="img-container">
+                            <div class="placeholder">?</div>
+                            <img src="${item.img}">
+                        </div>
                         <div style="padding:15px;">
                             <div style="font-size:0.85rem; font-weight:bold; color:${isOwned?'var(--text-main)':'var(--placeholder-color)'}">${isOwned ? item.name : '尚未獲得'}</div>
                             <div style="font-size:0.7rem; color: var(--text-muted); margin-top:5px;">持有: ${count}</div>
@@ -733,7 +736,6 @@
             list.innerHTML = `<div class="empty-notice">你的圖鑑空空如也，快去商店抽取第一個盲盒來解鎖吧！</div>`;
         }
 
-        // 5. 渲染圖鑑分頁鈕
         renderPaginationUI('col-pagination', validSeriesKeys.length, colCurrentPage, itemsPerPage, 'changeColPage');
     }
 
@@ -753,14 +755,13 @@
         localStorage.setItem('energy', energy);
         localStorage.setItem('lastTime', lastTime);
         
-        const buyButtons = document.querySelectorAll('.buy-btn');
-        buyButtons.forEach(btn => {
+        document.querySelectorAll('.buy-btn').forEach(btn => {
             btn.disabled = energy <= 0;
         });
     }
 
     function switchTab(tab) {
-        currentTab = tab; // 記錄當前頁面
+        currentTab = tab;
         if (tab === 'shop') {
             document.getElementById('shop-view').style.display = 'block';
             document.getElementById('col-view').style.display = 'none';
@@ -776,6 +777,7 @@
         }
     }
 
+    // ================= 核心抽盲盒邏輯 =================
     function startGacha(seriesName) {
         if (energy <= 0) return;
         energy--;
@@ -789,25 +791,36 @@
         const reward = finalPool[Math.floor(Math.random() * finalPool.length)];
 
         const invKey = `${seriesName}_${reward.name}`;
+        const isFirstTimeUnlock = !(inventory[invKey] > 0);
+
+        // 寫入本地數據庫
         inventory[invKey] = (inventory[invKey] || 0) + 1;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
 
-		// 同時將中獎卡片資訊與該盲盒的封面圖 (series.cover) 傳過去
+        // 檢查此系列是否全收集完成
+        const isSeriesCompletedNow = series.items.every(item => (inventory[`${seriesName}_${item.name}`] || 0) > 0);
+
+        // 緩存本次抽盲盒的核心狀態
+        gachaRewardInfo = {
+            seriesName: seriesName,
+            rewardName: reward.name,
+            invKey: invKey,
+            isNewCard: isFirstTimeUnlock,
+            isSeriesCompleted: isFirstTimeUnlock && isSeriesCompletedNow
+        };
+
         showGachaAnimation(reward, series.cover);
     }
 
-    
     function showGachaAnimation(reward, seriesCover) {
         const stage = document.getElementById('gacha-stage');
         const box = document.getElementById('target-box');
         const card = document.getElementById('result-card');
         const action = document.getElementById('action-area');
-		
-        // 動態將系列的封面圖網址，同步填入到 3D 盒子的每一個面
-		const allFaces = box.querySelectorAll('.face');
-		allFaces.forEach(face => {
-			face.style.backgroundImage = `url('${seriesCover}')`;
-		});
+        
+        box.querySelectorAll('.face').forEach(face => {
+            face.style.backgroundImage = `url('${seriesCover}')`;
+        });
         
         card.className = "card-final" + (reward.type === 'secret' ? ' secret' : '');
         document.getElementById('result-img').src = reward.img;
@@ -817,11 +830,10 @@
 
         stage.style.display = 'flex';
         box.style.display = 'block';
-        box.className = "box-3d box-animate"; // 重置並啟動精準轉一圈動畫
+        box.className = "box-3d box-animate"; 
         card.style.display = 'none';
         action.style.display = 'none';
 
-        // 1200ms 正好配合轉完一圈的時間點觸發爆開效果
         setTimeout(() => {
             box.className = "box-3d box-burst";
             setTimeout(() => {
@@ -833,24 +845,153 @@
         }, 600);
     }
 
-    function closeStage() {
-        document.getElementById('gacha-stage').style.display = 'none';
-        if(document.getElementById('col-view').style.display === 'block') {
-            renderCollection();
+    // ================= 收入圖鑑（修正核心跳頁定位邏輯） =================
+	function closeStage() {
+		document.getElementById('gacha-stage').style.display = 'none';
+		
+		if (gachaRewardInfo && gachaRewardInfo.isNewCard) {
+			const sName = gachaRewardInfo.seriesName;
+			
+			// 清除圖鑑搜尋字詞，確保新系列能無障礙展現
+			document.getElementById('col-search').value = ""; 
+			
+			// 重新計算最新、包含剛解鎖系列在內的有效圖鑑系列陣列
+			const validSeriesKeys = getValidCollectionSeries();
+			const targetIndex = validSeriesKeys.indexOf(sName);
+			
+			if (targetIndex !== -1) {
+				const itemsPerPage = calculateItemsPerPage();
+				// 計算出它在哪一頁
+				const targetPage = Math.floor(targetIndex / itemsPerPage) + 1;
+				
+				// 設定跳頁目標
+				colCurrentPage = targetPage;
+				switchTab('col');
+				
+				// 等待 DOM 節點生成完畢後進行平滑聚焦與解鎖翻轉動畫
+				setTimeout(() => {
+					const safeCardId = `card-${btoa(encodeURIComponent(gachaRewardInfo.invKey)).replace(/=/g, '')}`;
+					const cardDom = document.getElementById(safeCardId);
+					
+					if (cardDom) {
+						// 1. 讓畫面平滑滾動到該卡片位置（此時卡片在 HTML 渲染時已經完美維持在問號狀態）
+						cardDom.scrollIntoView({ behavior: 'smooth', block: 'center' });
+						
+						// 2. 滾動定格後，準備執行翻牌與後續特效排程
+						setTimeout(() => {
+							// 觸發翻轉動畫 (總長度 800ms)
+							cardDom.classList.add('just-unlocked');
+							
+							// 3. 在翻轉動畫進行到一半（400ms，卡片呈 90 度側向玩家時）將卡面圖案與文字秀出來
+							setTimeout(() => {
+								cardDom.classList.add('owned');
+								
+								// 同步將卡片標題文字從「尚未獲得」改成真正的名字，並恢復顏色
+								const textDiv = cardDom.querySelector('div[style*="font-size:0.85rem"]');
+								if (textDiv) {
+									textDiv.innerText = gachaRewardInfo.rewardName;
+									textDiv.style.color = 'var(--text-main)';
+								}
+							}, 400);
+
+							// 4. 等到 800ms 翻牌動畫完全結束、卡片正面定格時，才觸發彩帶噴發
+							setTimeout(() => {
+								cardDom.classList.remove('just-unlocked');
+								
+								// 卡片完全轉正後，判定是否集齊全系列並噴發彩帶
+								if (gachaRewardInfo.isSeriesCompleted) {
+									triggerConfettiEffect();
+								}
+								
+								gachaRewardInfo = null; // 於動畫與特效完全排程後釋放快照
+							}, 800);
+							
+						}, 600); // 等待滾動定位的時間
+						
+					} else {
+						gachaRewardInfo = null;
+					}
+				}, 300);
+				return;
+			}
+		}
+
+		if(document.getElementById('col-view').style.display === 'block') {
+			renderCollection();
+		}
+	}
+
+
+    // ================= 彩帶噴射特效引擎 =================
+    let confettiAnimationId = null;
+    function triggerConfettiEffect() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.style.display = 'block';
+        
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        
+        let particles = [];
+        const colors = ['#f472b6', '#c084fc', '#818cf8', '#a7f3d0', '#fef08a', '#ff7300'];
+
+        for (let i = 0; i < 60; i++) {
+            particles.push({
+                x: 0, y: height * 0.75,
+                vx: Math.random() * 12 + 8, vy: -(Math.random() * 15 + 10),
+                size: Math.random() * 6 + 6,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                rotation: Math.random() * 360, rotationSpeed: Math.random() * 10 - 5,
+                opacity: 1
+            });
         }
+        for (let i = 0; i < 60; i++) {
+            particles.push({
+                x: width, y: height * 0.75,
+                vx: -(Math.random() * 12 + 8), vy: -(Math.random() * 15 + 10),
+                size: Math.random() * 6 + 6,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                rotation: Math.random() * 360, rotationSpeed: Math.random() * 10 - 5,
+                opacity: 1
+            });
+        }
+
+        const gravity = 0.45;
+        const friction = 0.98;
+        const startTime = Date.now();
+
+        function updateConfetti() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach((p) => {
+                p.vx *= friction; p.vy += gravity; p.x += p.vx; p.y += p.vy; p.rotation += p.rotationSpeed;
+                const elapsed = Date.now() - startTime;
+                if (elapsed > 700) {
+                    p.opacity = Math.max(0, 1 - (elapsed - 700) / 400); 
+                }
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.5);
+                ctx.restore();
+            });
+
+            if (Date.now() - startTime < 1100) {
+                confettiAnimationId = requestAnimationFrame(updateConfetti);
+            } else {
+                ctx.clearRect(0, 0, width, height);
+                canvas.style.display = 'none';
+                cancelAnimationFrame(confettiAnimationId);
+            }
+        }
+        cancelAnimationFrame(confettiAnimationId);
+        updateConfetti();
     }
 
-    // 監聽視窗縮放事件，在縮放時重新計算排版與分頁
-    let resizeTimeout;
     window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            if (currentTab === 'shop') {
-                renderShop();
-            } else {
-                renderCollection();
-            }
-        }, 200); // 加上防抖(Debounce)優化效能
+        if (currentTab === 'shop') renderShop();
+        else renderCollection();
     });
 
     // INIT
